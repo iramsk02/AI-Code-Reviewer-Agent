@@ -20,7 +20,7 @@ class ReviewAgent:
         self.static_tools = StaticAnalysisTools(workspace_path)
         self.kg_tools = KnowledgeGraphTools(kg_path)
         self.pr_number = pr_number
-        self.llm = ChatGroq(model="llama-3.1-70b-versatile", groq_api_key=os.getenv("GROQ_API_KEY"))
+        self.llm = ChatGroq(model="llama-3.3-70b-versatile", groq_api_key=os.getenv("GROQ_API_KEY"))
         self.agent_executor = self._create_agent()
 
     def _create_agent(self):
