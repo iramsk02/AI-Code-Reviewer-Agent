@@ -14,6 +14,18 @@ class InlineComment(BaseModel):
     path: str = Field(description="Relative path of the file being reviewed")
     line: int = Field(description="Line number where the comment is relevant")
 
+class StaticScanInput(BaseModel):
+    path: str = Field(description="The path or file to scan (e.g., '.' or 'src/main.py')")
+
+class FileContextInput(BaseModel):
+    path: str = Field(description="The path to the file to fetch")
+
+class KnowledgeGraphInput(BaseModel):
+    query: str = Field(description="The query string for the knowledge graph")
+
+class PRCommentInput(BaseModel):
+    body: str = Field(description="The generic review summary to post as a comment on the PR")
+
 class ReviewAgent:
     def __init__(self, github_token, repo_name, workspace_path, pr_number, kg_path="knowledge_graph.json"):
         self.github_tools = GitHubTools(github_token, repo_name)
@@ -29,22 +41,26 @@ class ReviewAgent:
             StructuredTool.from_function(
                 name="run_static_scan",
                 func=self.static_tools.run_semgrep_scan,
-                description="Runs a security scan using Semgrep on the specified path or file. Useful for finding vulnerabilities."
+                description="Runs a security scan using Semgrep on the specified path or file. Useful for finding vulnerabilities.",
+                args_schema=StaticScanInput
             ),
             StructuredTool.from_function(
                 name="get_file_context",
                 func=self.github_tools.get_file_content,
-                description="Fetches the full content of a specified file. Use this when the diff context is insufficient to understand the change."
+                description="Fetches the full content of a specified file. Use this when the diff context is insufficient to understand the change.",
+                args_schema=FileContextInput
             ),
             StructuredTool.from_function(
                 name="query_knowledge_graph",
                 func=self.kg_tools.query_kg,
-                description="Queries the project's knowledge graph for architectural context or specific domain knowledge. Use this to understand code dependencies or core concepts."
+                description="Queries the project's knowledge graph for architectural context or specific domain knowledge. Use this to understand code dependencies or core concepts.",
+                args_schema=KnowledgeGraphInput
             ),
             StructuredTool.from_function(
                 name="post_pr_comment",
                 func=lambda body: self.github_tools.post_pr_comment(self.pr_number, body),
-                description="Posts a high-level summary review as a comment on the PR. Provide a summary of all findings here."
+                description="Posts a high-level summary review as a comment on the PR. Provide a summary of all findings here.",
+                args_schema=PRCommentInput
             ),
             StructuredTool.from_function(
                 name="post_inline_comment",
