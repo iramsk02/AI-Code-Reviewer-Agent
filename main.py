@@ -1,3 +1,4 @@
+import sys
 import os
 from dotenv import load_dotenv
 from agent import ReviewAgent
@@ -15,13 +16,13 @@ def main():
     # Error handling for missing required environment variables
     if not github_token:
         print("Error: GITHUB_TOKEN is not set.")
-        return
+        sys.exit(1)
     if not repo_name:
         print("Error: GITHUB_REPOSITORY is not set.")
-        return
+        sys.exit(1)
     if not pr_number:
         print("Error: PR_NUMBER is not set.")
-        return
+        sys.exit(1)
 
     # Initialize and run the reviewer agent
     try:
@@ -34,6 +35,7 @@ def main():
         print(f"Review completed successfully: {result['output']}")
     except Exception as e:
         print(f"Error during PR review: {str(e)}")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
